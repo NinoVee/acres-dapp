@@ -9,7 +9,11 @@ import { clusterApiUrl } from "@solana/web3.js";
 require("@solana/wallet-adapter-react-ui/styles.css");
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const endpoint = useMemo(() => clusterApiUrl("mainnet-beta"), []);
+  const endpoint = const endpoint = useMemo(
+  () => process.env.NEXT_PUBLIC_SOLANA_RPC!,
+  []
+);
+
   const wallets = useMemo(() => [new PhantomWalletAdapter(), new SolflareWalletAdapter()], []);
 
   return (
@@ -20,3 +24,4 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     </ConnectionProvider>
   );
 }
+
