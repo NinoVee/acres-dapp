@@ -1,0 +1,181 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   Root & Theme
+========================= */
+
+:root {
+  --bg-main: #09090b;        /* zinc-950 */
+  --bg-card: #18181b;        /* zinc-900 */
+  --border-main: #27272a;    /* zinc-800 */
+  --text-main: #fafafa;
+  --text-muted: #a1a1aa;     /* zinc-400 */
+  --accent: #22c55e;         /* emerald-500 */
+  --accent-2: #6366f1;       /* indigo-500 */
+  --danger: #ef4444;
+  color-scheme: dark;
+}
+
+/* =========================
+   Base Styles
+========================= */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* =========================
+   Links
+========================= */
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   Inputs & Buttons
+========================= */
+
+input,
+select,
+textarea {
+  background-color: rgba(9, 9, 11, 0.6);
+  border: 1px solid var(--border-main);
+  color: var(--text-main);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  outline: none;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-muted);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
+}
+
+/* =========================
+   Buttons
+========================= */
+
+button {
+  background-color: var(--accent);
+  color: #022c22;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-weight: 600;
+  transition: background-color 0.15s ease, transform 0.05s ease;
+}
+
+button:hover {
+  background-color: #16a34a;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary buttons */
+.btn-secondary {
+  background-color: var(--accent-2);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #4f46e5;
+}
+
+/* =========================
+   Cards / Panels
+========================= */
+
+.card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-main);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+}
+
+/* =========================
+   Status Messages
+========================= */
+
+.status {
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  color: var(--text-muted);
+}
+
+.status-success {
+  color: #22c55e;
+}
+
+.status-error {
+  color: var(--danger);
+}
+
+/* =========================
+   Wallet Adapter Overrides
+========================= */
+
+.wallet-adapter-button {
+  background-color: #27272a !important;
+  color: white !important;
+  border-radius: 0.5rem !important;
+  font-weight: 600 !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: #3f3f46 !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: #09090b !important;
+}
+
+/* =========================
+   Scrollbar (Webkit)
+========================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
