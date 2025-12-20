@@ -1,10 +1,11 @@
 "use client";
 
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import Balances from "@/components/Balances";
-import TransferSol from "@/components/TransferSol";
-import TransferAcres2022 from "@/components/TransferAcres2022";
-import SwapJupiter from "@/components/SwapJupiter";
+import Balances from "../components/Balances";
+import TransferSol from "../components/TransferSol";
+import TransferAcres2022 from "../components/TransferAcres2022";
+import SwapJupiter from "../components/SwapJupiter";
+
 
 export default function Page() {
   return (
@@ -33,3 +34,4 @@ export default function Page() {
     </main>
   );
 }
+
