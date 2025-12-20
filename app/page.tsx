@@ -1,18 +1,21 @@
 "use client";
 
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import dynamic from "next/dynamic";
 import Balances from "../components/Balances";
 import TransferSol from "../components/TransferSol";
 import TransferAcres2022 from "../components/TransferAcres2022";
 import SwapJupiter from "../components/SwapJupiter";
 
+const WalletButton = dynamic(() => import("../components/WalletButton"), {
+  ssr: false,
+});
 
 export default function Page() {
   return (
     <main className="mx-auto max-w-3xl p-6">
       <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold">$ACRES ↔ SOL dApp</h1>
-        <WalletMultiButton />
+        <WalletButton />
       </div>
 
       <p className="mt-3 text-sm text-zinc-300">
@@ -29,9 +32,9 @@ export default function Page() {
       </div>
 
       <footer className="mt-10 text-xs text-zinc-500">
-        If a transfer fails, your token may have Token-2022 extensions (fee/hook/frozen state) that require extra accounts.
+        If a transfer fails, your token may have Token-2022 extensions
+        (fee/hook/frozen state) that require extra handling.
       </footer>
     </main>
   );
 }
-
