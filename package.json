@@ -10,11 +10,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-<<<<<<< HEAD
-    "@solana/spl-token": "^0.1.8",
-=======
     "@solana/spl-token": "^0.3.11",
->>>>>>> 7f5da02 (Update MassTransfer component and config files for Token 2022)
     "@solana/wallet-adapter-base": "^0.9.24",
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
@@ -31,11 +27,7 @@
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "autoprefixer": "^10.4.20",
-<<<<<<< HEAD
-    "eslint": "^8.57.1",
-=======
     "eslint": "^9.39.2",
->>>>>>> 7f5da02 (Update MassTransfer component and config files for Token 2022)
     "eslint-config-next": "^16.1.1",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
