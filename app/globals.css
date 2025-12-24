@@ -7,14 +7,14 @@
 ========================= */
 
 :root {
-  --bg-main: #09090b;        /* zinc-950 */
-  --bg-card: #18181b;        /* zinc-900 */
-  --border-main: #27272a;    /* zinc-800 */
-  --text-main: #fafafa;
-  --text-muted: #a1a1aa;     /* zinc-400 */
-  --accent: #22c55e;         /* emerald-500 */
-  --accent-2: #6366f1;       /* indigo-500 */
-  --danger: #ef4444;
+  --bg-main: #000000;          /* Pure black */
+  --bg-card: #111111;          /* Dark gray */
+  --border-main: #00ff00;      /* Neon green */
+  --text-main: #ffffff;        /* White */
+  --text-muted: #a1ffa1;       /* Muted neon */
+  --accent: #00ff00;           /* Bright neon green */
+  --accent-2: #39ff14;         /* Vibrant neon */
+  --danger: #ff4444;           /* Bright red */
   color-scheme: dark;
 }
 
@@ -22,16 +22,14 @@
    Base Styles
 ========================= */
 
-html,
-body {
+html, body {
   height: 100%;
 }
 
 body {
   background-color: var(--bg-main);
   color: var(--text-main);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -41,26 +39,28 @@ body {
 
 a {
   color: var(--accent);
-  text-decoration: none;
+  text-shadow: 0 0 5px var(--accent);
 }
 
 a:hover {
   text-decoration: underline;
+  text-shadow: 0 0 8px var(--accent);
 }
 
 /* =========================
-   Inputs & Buttons
+   Inputs & Forms
 ========================= */
 
 input,
 select,
 textarea {
-  background-color: rgba(9, 9, 11, 0.6);
-  border: 1px solid var(--border-main);
+  background-color: rgba(0, 0, 0, 0.85);
+  border: 1px solid var(--accent);
   color: var(--text-main);
   border-radius: 0.5rem;
   padding: 0.6rem 0.75rem;
   outline: none;
+  box-shadow: 0 0 6px var(--accent);
 }
 
 input::placeholder,
@@ -71,8 +71,8 @@ textarea::placeholder {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.4);
+  border-color: var(--accent-2);
+  box-shadow: 0 0 12px var(--accent-2);
 }
 
 /* =========================
@@ -81,34 +81,43 @@ textarea:focus {
 
 button {
   background-color: var(--accent);
-  color: #022c22;
+  color: black;
   border-radius: 0.5rem;
   padding: 0.6rem 1rem;
-  font-weight: 600;
-  transition: background-color 0.15s ease, transform 0.05s ease;
+  font-weight: bold;
+  text-shadow: 0 0 3px black;
+  box-shadow: 0 0 12px var(--accent);
+  transition: background-color 0.2s ease, transform 0.1s ease;
 }
 
 button:hover {
-  background-color: #16a34a;
+  background-color: var(--accent-2);
+  box-shadow: 0 0 18px var(--accent-2);
 }
 
 button:active {
-  transform: scale(0.98);
+  transform: scale(0.97);
 }
 
 button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
-/* Secondary buttons */
+/* =========================
+   Secondary Buttons
+========================= */
+
 .btn-secondary {
   background-color: var(--accent-2);
-  color: white;
+  color: black;
+  box-shadow: 0 0 10px var(--accent-2);
 }
 
 .btn-secondary:hover {
-  background-color: #4f46e5;
+  background-color: #66ff33;
+  box-shadow: 0 0 15px #66ff33;
 }
 
 /* =========================
@@ -117,9 +126,10 @@ button:disabled {
 
 .card {
   background-color: var(--bg-card);
-  border: 1px solid var(--border-main);
+  border: 1px solid var(--accent);
   border-radius: 0.75rem;
   padding: 1.25rem;
+  box-shadow: 0 0 10px var(--accent);
 }
 
 /* =========================
@@ -133,34 +143,38 @@ button:disabled {
 }
 
 .status-success {
-  color: #22c55e;
+  color: var(--accent);
+  text-shadow: 0 0 6px var(--accent);
 }
 
 .status-error {
   color: var(--danger);
+  text-shadow: 0 0 6px var(--danger);
 }
 
 /* =========================
-   Wallet Adapter Overrides
+   Wallet Adapter (Dark Neon)
 ========================= */
 
 .wallet-adapter-button {
-  background-color: #27272a !important;
+  background-color: #111 !important;
   color: white !important;
   border-radius: 0.5rem !important;
   font-weight: 600 !important;
+  box-shadow: 0 0 8px var(--accent);
 }
 
 .wallet-adapter-button:hover {
-  background-color: #3f3f46 !important;
+  background-color: #222 !important;
+  box-shadow: 0 0 12px var(--accent-2);
 }
 
 .wallet-adapter-modal-wrapper {
-  background-color: #09090b !important;
+  background-color: var(--bg-main) !important;
 }
 
 /* =========================
-   Scrollbar (Webkit)
+   Scrollbar
 ========================= */
 
 ::-webkit-scrollbar {
@@ -168,14 +182,15 @@ button:disabled {
 }
 
 ::-webkit-scrollbar-track {
-  background: #09090b;
+  background: #000;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3f3f46;
+  background: var(--accent);
   border-radius: 4px;
+  box-shadow: 0 0 5px var(--accent);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
+  background: var(--accent-2);
 }
