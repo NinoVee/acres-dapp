@@ -104,8 +104,8 @@ export default function SwapJupiter() {
 
       <button
         onClick={onSwap}
-        className="mt-3 rounded-md bg-fuchsia-600 px-4 py-2 text-sm font-medium hover:bg-fuchsia-500"
-      >
+        className="bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold">
+
         Swap
       </button>
 
@@ -113,3 +113,4 @@ export default function SwapJupiter() {
     </section>
   );
 }
+
