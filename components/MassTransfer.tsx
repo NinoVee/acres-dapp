@@ -1,90 +1,165 @@
-// MassTransferTab.jsx
-import React, { useState } from 'react';
-import Papa from 'papaparse';
-import {
-  Connection,
-  PublicKey,
-  Transaction,
-} from '@solana/web3.js';
+"use client";
+
+import React, { useState } from "react";
+import Papa from "papaparse";
+import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
+  createAssociatedTokenAccountInstruction,
   createTransferInstruction,
-} from '@solana/spl-token';
+  TOKEN_2022_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+} from "@solana/spl-token";
 
-const TOKEN_MINT = 'YOUR_ACRES_TOKEN_MINT'; // <-- Replace with actual Token Mint
-const RPC_URL = 'https://api.mainnet-beta.solana.com';
+const RPC_URL = "https://api.mainnet-beta.solana.com";
 
-export default function MassTransferTab({ wallet }) {
-  const [recipients, setRecipients] = useState([]);
+// ✅ YOUR TOKEN‑2022 MINT
+const TOKEN_MINT = new PublicKey(
+  "9hTF4azRpZQFqgZ3YpgACD3aSbbB4NkeEUhp7NKZvmWe"
+);
+
+// ✅ CONFIRMED DECIMALS
+const TOKEN_DECIMALS = 9;
+
+interface Recipient {
+  Wallet: string;
+  Amount: string;
+}
+
+export default function MassTransfer({ wallet }: { wallet: any }) {
+  const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleCSVUpload = (e) => {
-    const file = e.target.files[0];
+  /* =========================
+     CSV Upload
+  ========================= */
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
     Papa.parse(file, {
       header: true,
+      skipEmptyLines: true,
       complete: (results) => {
-        const data = results.data.filter(r => r.Wallet && r.Amount);
-        setRecipients(data);
+        const clean = (results.data as Recipient[]).filter(
+          (r) => r.Wallet && r.Amount && !isNaN(Number(r.Amount))
+        );
+        setRecipients(clean);
       },
     });
   };
 
+  /* =========================
+     Mass Transfer Logic
+  ========================= */
   const handleMassTransfer = async () => {
     if (!wallet?.publicKey || recipients.length === 0) return;
 
     setLoading(true);
-    const connection = new Connection(RPC_URL);
-    const mint = new PublicKey(TOKEN_MINT);
+    const connection = new Connection(RPC_URL, "confirmed");
     const sender = wallet.publicKey;
 
-    const CHUNK_SIZE = 5; // prevent exceeding compute budget
+    // Sender ATA (Token‑2022)
+    const senderATA = await getAssociatedTokenAddress(
+      TOKEN_MINT,
+      sender,
+      false,
+      TOKEN_2022_PROGRAM_ID,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+
+    const CHUNK_SIZE = 4;
+
     for (let i = 0; i < recipients.length; i += CHUNK_SIZE) {
-      const chunk = recipients.slice(i, i + CHUNK_SIZE);
       const tx = new Transaction();
+      const chunk = recipients.slice(i, i + CHUNK_SIZE);
 
-      for (const { Wallet, Amount } of chunk) {
+      for (const row of chunk) {
         try {
-          const recipient = new PublicKey(Wallet.trim());
-          const fromATA = await getAssociatedTokenAddress(mint, sender);
-          const toATA = await getAssociatedTokenAddress(mint, recipient);
+          const recipient = new PublicKey(row.Wallet.trim());
 
-          const ix = createTransferInstruction(
-            fromATA,
-            toATA,
-            sender,
-            Number(Amount) * 1e6 // Adjust for token decimals
+          const amount = BigInt(
+            Math.floor(Number(row.Amount) * 10 ** TOKEN_DECIMALS)
           );
-          tx.add(ix);
+
+          const recipientATA = await getAssociatedTokenAddress(
+            TOKEN_MINT,
+            recipient,
+            false,
+            TOKEN_2022_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID
+          );
+
+          // Create ATA if missing
+          const ataInfo = await connection.getAccountInfo(recipientATA);
+          if (!ataInfo) {
+            tx.add(
+              createAssociatedTokenAccountInstruction(
+                sender,
+                recipientATA,
+                recipient,
+                TOKEN_MINT,
+                TOKEN_2022_PROGRAM_ID,
+                ASSOCIATED_TOKEN_PROGRAM_ID
+              )
+            );
+          }
+
+          // Transfer tokens
+          tx.add(
+            createTransferInstruction(
+              senderATA,
+              recipientATA,
+              sender,
+              amount,
+              [],
+              TOKEN_2022_PROGRAM_ID
+            )
+          );
         } catch (err) {
-          console.error('Invalid wallet or amount:', Wallet, Amount);
+          console.error("❌ Skipping row:", row, err);
         }
       }
 
       try {
         const sig = await wallet.sendTransaction(tx, connection);
-        console.log('Tx sent:', sig);
-      } catch (e) {
-        console.error('Transaction failed:', e);
+        await connection.confirmTransaction(sig, "confirmed");
+        console.log("✅ Batch sent:", sig);
+      } catch (err) {
+        console.error("❌ Batch failed:", err);
       }
     }
+
     setLoading(false);
+    alert("✅ Mass transfer complete");
   };
 
+  /* =========================
+     UI
+  ========================= */
   return (
-    <div className="card mt-4">
-      <h2 className="text-xl font-bold mb-4">Mass Transfer</h2>
+    <div className="card mt-6">
+      <h2 className="text-xl font-bold mb-3 text-green-400">
+        Mass Transfer (Token‑2022)
+      </h2>
+
+      <p className="text-sm text-zinc-400 mb-3">
+        CSV format: <code>Wallet,Amount</code>
+      </p>
+
       <input
         type="file"
         accept=".csv"
         onChange={handleCSVUpload}
-        className="mb-4 neon-input"
+        className="mb-4 w-full"
       />
+
       <button
         onClick={handleMassTransfer}
-        className="neon-button"
         disabled={loading || !recipients.length}
+        className="neon-button w-full"
       >
-        {loading ? 'Transferring...' : 'Execute Mass Transfer'}
+        {loading ? "Transferring..." : `Send to ${recipients.length} wallets`}
       </button>
     </div>
   );
