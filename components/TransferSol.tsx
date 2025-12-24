@@ -63,8 +63,8 @@ export default function TransferSol() {
 
         <button
           onClick={onSend}
-          className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium hover:bg-emerald-500"
-        >
+          className="bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold">
+
           Send SOL
         </button>
 
@@ -73,3 +73,4 @@ export default function TransferSol() {
     </section>
   );
 }
+
