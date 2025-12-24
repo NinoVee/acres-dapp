@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import Papa, { ParseResult } from "papaparse";
+import Papa from "papaparse";
+import type { ParseResult } from "papaparse";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
@@ -35,19 +36,20 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ================= CSV Upload ================= */
+  /* ========== CSV Upload ========== */
   const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    Papa.parse<Recipient>(file, {
+    Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
       complete: (results: ParseResult<Recipient>) => {
         const parsed = results.data.filter(
           (r) =>
-            r?.Wallet &&
-            r?.Amount &&
+            r &&
+            typeof r.Wallet === "string" &&
+            typeof r.Amount === "string" &&
             !isNaN(Number(r.Amount))
         );
         setRecipients(parsed);
@@ -55,12 +57,11 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
     });
   };
 
-  /* ================= Mass Transfer ================= */
+  /* ========== Mass Transfer ========== */
   const handleMassTransfer = async () => {
     if (!wallet.publicKey || recipients.length === 0) return;
 
     setLoading(true);
-
     const connection = new Connection(RPC_URL, "confirmed");
     const sender = wallet.publicKey;
 
@@ -135,7 +136,7 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
     alert("✅ Mass transfer complete");
   };
 
-  /* ================= UI ================= */
+  /* ========== UI ========== */
   return (
     <div className="card mt-6">
       <h2 className="text-xl font-bold mb-3 text-green-400">
