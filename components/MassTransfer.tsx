@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Papa from "papaparse";
+import Papa, { ParseResult } from "papaparse";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
@@ -14,8 +14,12 @@ import { WalletContextState } from "@solana/wallet-adapter-react";
 
 const RPC_URL = "https://api.mainnet-beta.solana.com";
 
-// ✅ Your Token-2022 Mint
-const TOKEN_MINT = new PublicKey("9hTF4azRpZQFqgZ3YpgACD3aSbbB4NkeEUhp7NKZvmWe");
+// ✅ Token‑2022 Mint
+const TOKEN_MINT = new PublicKey(
+  "9hTF4azRpZQFqgZ3YpgACD3aSbbB4NkeEUhp7NKZvmWe"
+);
+
+// ✅ Confirmed decimals
 const TOKEN_DECIMALS = 9;
 
 interface Recipient {
@@ -31,32 +35,35 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* ========== CSV Upload Handler ========== */
+  /* ================= CSV Upload ================= */
   const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    Papa.parse(file, {
+    Papa.parse<Recipient>(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results) => {
-        const parsed = (results.data as Recipient[]).filter(
-          (r) => r.Wallet && r.Amount && !isNaN(Number(r.Amount))
+      complete: (results: ParseResult<Recipient>) => {
+        const parsed = results.data.filter(
+          (r) =>
+            r?.Wallet &&
+            r?.Amount &&
+            !isNaN(Number(r.Amount))
         );
         setRecipients(parsed);
       },
     });
   };
 
-  /* ========== Mass Transfer Handler ========== */
+  /* ================= Mass Transfer ================= */
   const handleMassTransfer = async () => {
-    if (!wallet?.publicKey || recipients.length === 0) return;
+    if (!wallet.publicKey || recipients.length === 0) return;
 
     setLoading(true);
+
     const connection = new Connection(RPC_URL, "confirmed");
     const sender = wallet.publicKey;
 
-    // Fetch sender ATA
     const senderATA = await getAssociatedTokenAddress(
       TOKEN_MINT,
       sender,
@@ -128,7 +135,7 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
     alert("✅ Mass transfer complete");
   };
 
-  /* ========== UI ========== */
+  /* ================= UI ================= */
   return (
     <div className="card mt-6">
       <h2 className="text-xl font-bold mb-3 text-green-400">
@@ -136,7 +143,7 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
       </h2>
 
       <p className="text-sm text-zinc-400 mb-3">
-        Upload CSV with <code>Wallet,Amount</code> headers.
+        CSV format: <code>Wallet,Amount</code>
       </p>
 
       <input
@@ -148,7 +155,7 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
 
       <button
         onClick={handleMassTransfer}
-        disabled={loading || !recipients.length}
+        disabled={loading || recipients.length === 0}
         className="neon-button w-full"
       >
         {loading ? "Transferring..." : `Send to ${recipients.length} wallets`}
