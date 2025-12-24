@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import Papa from "papaparse";
-import type { ParseResult } from "papaparse";
 import { Connection, PublicKey, Transaction } from "@solana/web3.js";
 import {
   getAssociatedTokenAddress,
@@ -44,14 +43,15 @@ export default function MassTransfer({ wallet }: MassTransferProps) {
     Papa.parse(file, {
       header: true,
       skipEmptyLines: true,
-      complete: (results: ParseResult<Recipient>) => {
-        const parsed = results.data.filter(
-          (r) =>
+      complete: (results: any) => {
+        const parsed: Recipient[] = (results.data || []).filter(
+          (r: any) =>
             r &&
             typeof r.Wallet === "string" &&
             typeof r.Amount === "string" &&
             !isNaN(Number(r.Amount))
         );
+
         setRecipients(parsed);
       },
     });
