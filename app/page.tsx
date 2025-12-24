@@ -49,7 +49,7 @@ export default function Page() {
           </p>
 
           {/* ✅ PASS WALLET PROP */}
-          <MassTransfer wallet={wallet} />
+          <MassTransfer wallet={undefined} />
         </div>
       </div>
 
@@ -60,3 +60,4 @@ export default function Page() {
     </main>
   );
 }
+
