@@ -44,8 +44,9 @@ export default function SwapJupiter() {
 
       const quote = await fetch(quoteUrl).then((r) => r.json());
 
-      if (!quote?.routePlan?.length) {
-        return setStatus("No route found (liquidity may be low or token restrictions).");
+     if (!quote?.routePlan?.length) {
+    console.error("Jupiter quote error:", quote);
+    return setStatus("Load failed: Check token liquidity, amount, or try again later.");
       }
 
       setStatus("Requesting swap transaction…");
@@ -113,4 +114,5 @@ export default function SwapJupiter() {
     </section>
   );
 }
+
 
