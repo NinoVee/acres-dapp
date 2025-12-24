@@ -5,7 +5,7 @@ import Balances from "../components/Balances";
 import TransferSol from "../components/TransferSol";
 import TransferAcres2022 from "../components/TransferAcres2022";
 import SwapJupiter from "../components/SwapJupiter";
-import MassTransferTab from "../components/MassTransferTab"; // <-- NEW
+import MassTransferTab from "../components/MassTransfer"; // <-- NEW
 
 const WalletButton = dynamic(() => import("../components/WalletButton"), {
   ssr: false,
@@ -47,3 +47,4 @@ export default function Page() {
     </main>
   );
 }
+
