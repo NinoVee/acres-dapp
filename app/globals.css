@@ -76,48 +76,46 @@ textarea:focus {
 }
 
 /* =========================
-   Buttons
+   Neon Buttons
 ========================= */
 
-button {
-  background-color: var(--accent);
-  color: black;
+button,
+.neon-button,
+.btn-primary,
+.btn-secondary {
+  background-color: black;
+  color: white;
+  border: 2px solid var(--accent);
   border-radius: 0.5rem;
-  padding: 0.6rem 1rem;
-  font-weight: bold;
-  text-shadow: 0 0 3px black;
-  box-shadow: 0 0 12px var(--accent);
-  transition: background-color 0.2s ease, transform 0.1s ease;
+  padding: 0.6rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  text-shadow: 0 0 5px var(--accent);
+  box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-button:hover {
-  background-color: var(--accent-2);
-  box-shadow: 0 0 18px var(--accent-2);
+button:hover,
+.neon-button:hover,
+.btn-primary:hover,
+.btn-secondary:hover {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 15px var(--accent-2), 0 0 25px var(--accent-2);
+  transform: scale(1.03);
 }
 
-button:active {
+button:active,
+.neon-button:active {
   transform: scale(0.97);
+  box-shadow: 0 0 6px var(--accent);
 }
 
-button:disabled {
+button:disabled,
+.neon-button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
-}
-
-/* =========================
-   Secondary Buttons
-========================= */
-
-.btn-secondary {
-  background-color: var(--accent-2);
-  color: black;
-  box-shadow: 0 0 10px var(--accent-2);
-}
-
-.btn-secondary:hover {
-  background-color: #66ff33;
-  box-shadow: 0 0 15px #66ff33;
 }
 
 /* =========================
@@ -157,16 +155,18 @@ button:disabled {
 ========================= */
 
 .wallet-adapter-button {
-  background-color: #111 !important;
+  background-color: black !important;
   color: white !important;
   border-radius: 0.5rem !important;
   font-weight: 600 !important;
-  box-shadow: 0 0 8px var(--accent);
+  border: 2px solid var(--accent) !important;
+  box-shadow: 0 0 10px var(--accent), 0 0 20px var(--accent);
 }
 
 .wallet-adapter-button:hover {
-  background-color: #222 !important;
-  box-shadow: 0 0 12px var(--accent-2);
+  background-color: black !important;
+  border-color: var(--accent-2) !important;
+  box-shadow: 0 0 15px var(--accent-2), 0 0 25px var(--accent-2);
 }
 
 .wallet-adapter-modal-wrapper {
