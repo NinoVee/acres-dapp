@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { VersionedTransaction } from "@solana/web3.js";
+import { VersionedTransaction, PublicKey } from "@solana/web3.js";
 import { ACRES_MINT, WSOL_MINT } from "@/lib/constants";
 import { getAcresDecimals } from "@/lib/solana";
 
@@ -16,69 +16,99 @@ export default function SwapJupiter() {
   const [amount, setAmount] = useState("0.01");
   const [slippageBps, setSlippageBps] = useState("100");
   const [status, setStatus] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const inputMint = useMemo(() => {
-    return direction === "SOL_TO_ACRES" ? WSOL_MINT : ACRES_MINT.toBase58();
-  }, [direction]);
+  /* ---------- MINTS ---------- */
+  const inputMint = useMemo(
+    () => (direction === "SOL_TO_ACRES" ? WSOL_MINT : ACRES_MINT.toBase58()),
+    [direction]
+  );
 
-  const outputMint = useMemo(() => {
-    return direction === "SOL_TO_ACRES" ? ACRES_MINT.toBase58() : WSOL_MINT;
-  }, [direction]);
+  const outputMint = useMemo(
+    () => (direction === "SOL_TO_ACRES" ? ACRES_MINT.toBase58() : WSOL_MINT),
+    [direction]
+  );
 
+  /* ---------- SWAP ---------- */
   async function onSwap() {
-    if (!publicKey) return setStatus("Connect wallet first.");
+    if (!publicKey) {
+      setStatus("Connect wallet first.");
+      return;
+    }
 
     try {
-      setStatus("Preparing quote…");
+      setLoading(true);
+      setStatus("Fetching Jupiter quote…");
 
-      // Amount -> raw units
       const decimals =
-        direction === "SOL_TO_ACRES" ? 9 : await getAcresDecimals(connection, ACRES_MINT);
+        direction === "SOL_TO_ACRES"
+          ? 9
+          : await getAcresDecimals(connection, ACRES_MINT);
 
-      const raw = Math.floor(Number(amount) * 10 ** decimals);
-      if (!Number.isFinite(raw) || raw <= 0) return setStatus("Invalid amount.");
-
-      const quoteUrl =
-        `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}` +
-        `&outputMint=${outputMint}&amount=${raw}&slippageBps=${encodeURIComponent(slippageBps)}`;
-
-      const quote = await fetch(quoteUrl).then((r) => r.json());
-
-     if (!quote?.routePlan?.length) {
-    console.error("Jupiter quote error:", quote);
-    return setStatus("Load failed: Check token liquidity, amount, or try again later.");
+      const rawAmount = Math.floor(Number(amount) * 10 ** decimals);
+      if (!Number.isFinite(rawAmount) || rawAmount <= 0) {
+        setStatus("Invalid amount.");
+        return;
       }
 
-      setStatus("Requesting swap transaction…");
+      /* ---------- QUOTE ---------- */
+      const quoteRes = await fetch(
+        `https://quote-api.jup.ag/v6/quote` +
+          `?inputMint=${inputMint}` +
+          `&outputMint=${outputMint}` +
+          `&amount=${rawAmount}` +
+          `&slippageBps=${slippageBps}`
+      ).then((r) => r.json());
 
-      const swapResp = await fetch("https://quote-api.jup.ag/v6/swap", {
+      if (!quoteRes?.data?.length) {
+        console.error("Jupiter quote error:", quoteRes);
+        setStatus("No swap route found. Try a different amount.");
+        return;
+      }
+
+      const route = quoteRes.data[0];
+
+      setStatus("Building swap transaction…");
+
+      /* ---------- SWAP TX ---------- */
+      const swapRes = await fetch("https://quote-api.jup.ag/v6/swap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          quoteResponse: quote,
+          quoteResponse: route,
           userPublicKey: publicKey.toBase58(),
-          wrapAndUnwrapSol: true
-        })
+          wrapAndUnwrapSol: true,
+        }),
       }).then((r) => r.json());
 
-      const swapTxB64 = swapResp?.swapTransaction;
-      if (!swapTxB64) return setStatus("Jupiter did not return a swap transaction.");
+      if (!swapRes?.swapTransaction) {
+        console.error("Swap response error:", swapRes);
+        setStatus("Failed to create swap transaction.");
+        return;
+      }
 
-      const tx = VersionedTransaction.deserialize(Buffer.from(swapTxB64, "base64"));
+      const tx = VersionedTransaction.deserialize(
+        Buffer.from(swapRes.swapTransaction, "base64")
+      );
 
-      setStatus("Sending swap… approve in wallet.");
-      const sig = await sendTransaction(tx as any, connection);
-      setStatus(`Swap sent. Tx: ${sig}`);
-    } catch (e: any) {
-      setStatus(e?.message ?? "Swap failed.");
+      setStatus("Approve swap in wallet…");
+      const sig = await sendTransaction(tx, connection);
+
+      setStatus(`✅ Swap sent: ${sig}`);
+    } catch (err: any) {
+      console.error("Swap failed:", err);
+      setStatus(err?.message || "Swap failed.");
+    } finally {
+      setLoading(false);
     }
   }
 
+  /* ---------- UI ---------- */
   return (
     <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-      <h2 className="text-lg font-medium">Swap (Jupiter)</h2>
+      <h2 className="text-lg font-medium mb-3">Swap (Jupiter)</h2>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         <select
           className="rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm"
           value={direction}
@@ -97,7 +127,7 @@ export default function SwapJupiter() {
 
         <input
           className="rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm"
-          placeholder="Slippage (bps) e.g. 100 = 1%"
+          placeholder="Slippage (bps)"
           value={slippageBps}
           onChange={(e) => setSlippageBps(e.target.value)}
         />
@@ -105,14 +135,13 @@ export default function SwapJupiter() {
 
       <button
         onClick={onSwap}
-        className="bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold">
-
-        Swap
+        disabled={loading}
+        className="mt-4 w-full bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold disabled:opacity-50"
+      >
+        {loading ? "Swapping…" : "Swap"}
       </button>
 
       {status && <div className="mt-3 text-sm text-zinc-300">{status}</div>}
     </section>
   );
 }
-
-
