@@ -10,15 +10,12 @@ import {
   TOKEN_2022_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
+import { WalletContextState } from "@solana/wallet-adapter-react";
 
 const RPC_URL = "https://api.mainnet-beta.solana.com";
 
-// ✅ YOUR TOKEN‑2022 MINT
-const TOKEN_MINT = new PublicKey(
-  "9hTF4azRpZQFqgZ3YpgACD3aSbbB4NkeEUhp7NKZvmWe"
-);
-
-// ✅ CONFIRMED DECIMALS
+// ✅ Your Token-2022 Mint
+const TOKEN_MINT = new PublicKey("9hTF4azRpZQFqgZ3YpgACD3aSbbB4NkeEUhp7NKZvmWe");
 const TOKEN_DECIMALS = 9;
 
 interface Recipient {
@@ -26,13 +23,15 @@ interface Recipient {
   Amount: string;
 }
 
-export default function MassTransfer({ wallet }: { wallet: any }) {
+interface MassTransferProps {
+  wallet: WalletContextState;
+}
+
+export default function MassTransfer({ wallet }: MassTransferProps) {
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(false);
 
-  /* =========================
-     CSV Upload
-  ========================= */
+  /* ========== CSV Upload Handler ========== */
   const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -41,17 +40,15 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        const clean = (results.data as Recipient[]).filter(
+        const parsed = (results.data as Recipient[]).filter(
           (r) => r.Wallet && r.Amount && !isNaN(Number(r.Amount))
         );
-        setRecipients(clean);
+        setRecipients(parsed);
       },
     });
   };
 
-  /* =========================
-     Mass Transfer Logic
-  ========================= */
+  /* ========== Mass Transfer Handler ========== */
   const handleMassTransfer = async () => {
     if (!wallet?.publicKey || recipients.length === 0) return;
 
@@ -59,7 +56,7 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
     const connection = new Connection(RPC_URL, "confirmed");
     const sender = wallet.publicKey;
 
-    // Sender ATA (Token‑2022)
+    // Fetch sender ATA
     const senderATA = await getAssociatedTokenAddress(
       TOKEN_MINT,
       sender,
@@ -77,7 +74,6 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
       for (const row of chunk) {
         try {
           const recipient = new PublicKey(row.Wallet.trim());
-
           const amount = BigInt(
             Math.floor(Number(row.Amount) * 10 ** TOKEN_DECIMALS)
           );
@@ -90,7 +86,6 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
             ASSOCIATED_TOKEN_PROGRAM_ID
           );
 
-          // Create ATA if missing
           const ataInfo = await connection.getAccountInfo(recipientATA);
           if (!ataInfo) {
             tx.add(
@@ -105,7 +100,6 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
             );
           }
 
-          // Transfer tokens
           tx.add(
             createTransferInstruction(
               senderATA,
@@ -134,9 +128,7 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
     alert("✅ Mass transfer complete");
   };
 
-  /* =========================
-     UI
-  ========================= */
+  /* ========== UI ========== */
   return (
     <div className="card mt-6">
       <h2 className="text-xl font-bold mb-3 text-green-400">
@@ -144,7 +136,7 @@ export default function MassTransfer({ wallet }: { wallet: any }) {
       </h2>
 
       <p className="text-sm text-zinc-400 mb-3">
-        CSV format: <code>Wallet,Amount</code>
+        Upload CSV with <code>Wallet,Amount</code> headers.
       </p>
 
       <input
