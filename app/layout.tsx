@@ -4,7 +4,7 @@ import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "$ACRES dApp",
-  description: "Token-2022 transfer + Jupiter swap"
+  description: "Token-2022 transfer + Jupiter swap + mass wallet transfer"
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -16,3 +16,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+
