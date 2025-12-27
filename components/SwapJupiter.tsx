@@ -24,7 +24,7 @@ export default function SwapJupiter() {
   const jupiterUrl = useMemo(() => {
     const params = new URLSearchParams({
       sell: sellMint,
-      buy: buyMint
+      buy: buyMint,
     });
     return `https://jup.ag/swap?${params.toString()}`;
   }, [sellMint, buyMint]);
@@ -40,12 +40,22 @@ export default function SwapJupiter() {
 
       <div className="mt-4 grid gap-3">
         <select
-          className="w-full rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm text-white"
           value={direction}
           onChange={(e) => setDirection(e.target.value as Direction)}
+          className="w-full rounded-md border border-zinc-700 bg-black p-2.5 text-sm text-white focus:outline-none"
         >
-          <option value="SOL_TO_ACRES">SOL → $ACRES</option>
-          <option value="ACRES_TO_SOL">$ACRES → SOL</option>
+          <option
+            value="SOL_TO_ACRES"
+            className="bg-black text-white"
+          >
+            SOL → $ACRES
+          </option>
+          <option
+            value="ACRES_TO_SOL"
+            className="bg-black text-white"
+          >
+            $ACRES → SOL
+          </option>
         </select>
 
         <button
