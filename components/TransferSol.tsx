@@ -1,71 +1,58 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { ACRES_MINT, WSOL_MINT } from "@/lib/constants";
 
-export default function TransferSol() {
-  const { connection } = useConnection();
-  const { publicKey, sendTransaction } = useWallet();
+type Direction = "SOL_TO_ACRES" | "ACRES_TO_SOL";
 
-  const [to, setTo] = useState("");
-  const [amount, setAmount] = useState("0.01");
+export default function SwapJupiter() {
+  const [direction, setDirection] = useState<Direction>("SOL_TO_ACRES");
   const [status, setStatus] = useState("");
 
-  const dest = useMemo(() => {
-    try {
-      return new PublicKey(to);
-    } catch {
-      return null;
-    }
-  }, [to]);
+  const sellMint = useMemo(() => {
+    return direction === "SOL_TO_ACRES"
+      ? WSOL_MINT
+      : ACRES_MINT.toBase58();
+  }, [direction]);
 
-  async function onSend() {
-    if (!publicKey) return setStatus("Connect wallet first.");
-    if (!dest) return setStatus("Invalid destination address.");
+  const buyMint = useMemo(() => {
+    return direction === "SOL_TO_ACRES"
+      ? ACRES_MINT.toBase58()
+      : WSOL_MINT;
+  }, [direction]);
 
-    try {
-      setStatus("Building SOL transfer…");
-      const lamports = Math.floor(Number(amount) * LAMPORTS_PER_SOL);
+  const jupiterUrl = useMemo(() => {
+    const params = new URLSearchParams({
+      sell: sellMint,
+      buy: buyMint
+    });
+    return `https://jup.ag/swap?${params.toString()}`;
+  }, [sellMint, buyMint]);
 
-      const tx = new Transaction().add(
-        SystemProgram.transfer({
-          fromPubkey: publicKey,
-          toPubkey: dest,
-          lamports
-        })
-      );
-
-      const sig = await sendTransaction(tx, connection);
-      setStatus(`Sent. Tx: ${sig}`);
-    } catch (e: any) {
-      setStatus(e?.message ?? "Transfer failed.");
-    }
+  function onSwap() {
+    setStatus("Redirecting to Jupiter…");
+    window.open(jupiterUrl, "_blank", "noopener,noreferrer");
   }
 
   return (
     <section className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-5">
-      <h2 className="text-lg font-medium">Transfer SOL</h2>
+      <h2 className="text-lg font-medium">Swap (Jupiter)</h2>
 
       <div className="mt-4 grid gap-3">
-        <input
-          className="w-full rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm"
-          placeholder="Destination address"
-          value={to}
-          onChange={(e) => setTo(e.target.value)}
-        />
-        <input
-          className="w-full rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm"
-          placeholder="Amount (SOL)"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
+        <select
+          className="w-full rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm text-white"
+          value={direction}
+          onChange={(e) => setDirection(e.target.value as Direction)}
+        >
+          <option value="SOL_TO_ACRES">SOL → $ACRES</option>
+          <option value="ACRES_TO_SOL">$ACRES → SOL</option>
+        </select>
 
         <button
-          onClick={onSend}
-          className="bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold">
-
-          Send SOL
+          onClick={onSwap}
+          className="bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold focus:outline-none"
+        >
+          Swap on Jupiter
         </button>
 
         {status && <div className="text-sm text-zinc-300">{status}</div>}
@@ -73,4 +60,3 @@ export default function TransferSol() {
     </section>
   );
 }
-
