@@ -35,7 +35,7 @@ export default function SwapJupiterRedirect() {
 
       <div className="grid gap-3 md:grid-cols-3">
         <select
-          className="rounded-md border border-zinc-700 bg-zinc-950/40 p-2.5 text-sm"
+          className="rounded-md border border-zinc-700 bg-black text-white p-2.5 text-sm"
           value={direction}
           onChange={(e) => setDirection(e.target.value as Direction)}
         >
@@ -48,7 +48,7 @@ export default function SwapJupiterRedirect() {
         href={jupiterUrl}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-4 w-full bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold disabled:opacity-50"
+        className="mt-4 w-full bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold disabled:opacity-50 text-center block"
       >
         Swap on Jupiter
       </a>
@@ -59,4 +59,3 @@ export default function SwapJupiterRedirect() {
     </section>
   );
 }
-
