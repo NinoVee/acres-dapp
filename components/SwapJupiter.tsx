@@ -36,13 +36,13 @@ export default function SwapJupiter() {
         </select>
 
         <a
-          href={jupiterUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-black text-white border border-neon-green shadow-[0_0_15px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold text-center block"
-        >
-          Swap on Jupiter
-        </a>
+  href={jupiterUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="bg-black text-white border border-neon-green shadow-[0_0_10px_#00ff00] hover:shadow-[0_0_20px_#39ff14] rounded-md px-4 py-2 font-bold transition duration-150 text-center"
+>
+  Swap on Jupiter
+</a>
 
         <p className="text-xs text-zinc-400">
           You will be redirected to Jupiter to complete your swap.
@@ -51,3 +51,4 @@ export default function SwapJupiter() {
     </section>
   );
 }
+
