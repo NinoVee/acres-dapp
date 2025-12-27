@@ -1,3 +1,35 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+
+export default function TransferSol() {
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
+
+  const [to, setTo] = useState("");
+  const [amount, setAmount] = useState("0.01");
+  const [status, setStatus] = useState("");
+
+  const dest = useMemo(() => {
+    try {
+      return new PublicKey(to);
+    } catch {
+      return null;
+    }
+  }, [to]);
+
+  async function onSend() {
+    if (!publicKey) return setStatus("Connect wallet first.");
+    if (!dest) return setStatus("Invalid destination address.");
+
+    try {
+      setStatus("Building SOL transfer…");
+      const lamports = Math.floor(Number(amount) * LAMPORTS_PER_SOL);
+
+      const tx = new Transaction().add(
+        SystemProgram.transfer({
           fromPubkey: publicKey,
           toPubkey: dest,
           lamports
@@ -41,3 +73,4 @@
     </section>
   );
 }
+
